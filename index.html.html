@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="react/react.js"></script>
+    <script src="react/react-dom.js"></script>
+    <script src="react/babel.js"></script>
+
+    <div id="app"></div>
+
+    <script type="text/babel">
+            const lorem = "Aesop was one of the great Greek writers. He is best known for his fables, stories that have a moral. They teach us something about how we should live our lives. Aesop wrote thousands of these stories. Here are a few. The Wolf in Sheep's Clothing Once upon a time, a Wolf decided to disguise the way he looked. He thought it would help him get food more easily. He put on the skin of a sheep, then he went out with the flock into the pasture. Even the shepherd was fooled by his clever costume. In the evening, the shepherd put him in with the rest of the sheep. He closed the gate and made sure it was secure before he went to bed. In the middle of the night, he came back to the fold to get some meat for the next day. Instead of a sheep, though, he grabbed the Wolf, killing him instantly. Those who look to harm others will be harmed themselves. The Bat and the Weasel A Bat fell on the ground and was caught by a Weasel. It begged the Weasel to spare its life, but the Weasel refused. It told the Bat that birds, by nature, were its enemy. The Bat assured him that it was not a bird, it was a mouse. The Weasel thought a moment, then set it free. A while later, the Bat fell again to the ground, and it was caught by another Weasel. It begged this Weasel not to eat him, either. The Weasel, though, said it did not like mice at all and would eat it. The Bat told the Weasel that it was not a mouse, but a bat. The second Weasel had no good answer, so he let it go. The Bat knew it is always wise to turn events to your advantage. The Lion and the Mouse A sleeping Lion was woken up by a Mouse running over his face. He got up angrily and caught the scared little Mouse. He was about to kill the Mouse, but it said in its squeaky little voice, 'If you would only spare my life, I would be sure to repay your kindness.' The Lion laughed at such nonsense, but he let him go. A short time later, though, the Lion was caught by some hunters. They bound him by ropes to the ground. The Mouse recognized his roar, and he rushed over and gnawed the rope with his teeth, setting the Lion free. The Mouse said 'You laughed at the idea of my ever being able to help you. Now you know that it is possible for even a small little Mouse to help a great big Lion.'"
+            const toType = lorem.split('')
+            var text
+            var typed
+            var playing
+
+        class TypingTest extends React.Component {
+            constructor() {
+                super()
+                this.state = {
+                    tex : [],
+                    secs: 60,
+                    playing: false,
+                    wpm: '',
+                    accuracy: '',
+                    awpm: '',
+                    val: ''
+                    }
+                this.onTextChange = this.onTextChange.bind(this)
+            }
+
+            onTextChange(event){
+                text
+                typed = event.target.value
+
+                this.setState(
+                    {tex: typed,
+                    val: typed}, 
+                    () => {
+                        text = this.state.tex
+                        typed = text.split('')
+                    }
+                )
+            }
+
+            startTest = () => {
+                this.setState({
+                    playing: true,
+                    wpm: '',
+                    accuracy: '',
+                    awpm: ''
+                    })
+                this.startTimer()
+            }
+            
+            startTimer = () => {
+                var countDownDate = new Date().getTime() + 60000;
+
+                // Update the count down every 1 second
+                var x = setInterval(() => {
+
+                    // Get today's date and time
+                    var now = new Date().getTime()
+                        
+                    // Find the distance between now and the count down date
+                    var distance = countDownDate - now;
+                        
+                    // Time calculations for seconds
+
+                    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                        
+                    this.setState({secs: seconds}) 
+
+                    // If the count down is over, write some text 
+                    if (distance < 1000) {
+                        clearInterval(x);
+                        this.timerEnd()
+                    }
+                }, 1000);
+            }
+
+            
+
+            timerEnd = () => {
+               this.setState({playing: false})
+               var typedNoSpace = noSpace(typed)
+               var percentage =(compareArray(toType, typed)) // percentage of correctly typed chars
+               var wpm = (typedNoSpace.length / 5) // words per minute
+               var awpm = wpm * percentage // wpm factoring percentage
+               if(isNaN(wpm)){
+                   wpm = 0
+               }if(isNaN(percentage)){
+                   percentage = 0
+               }if(isNaN(awpm)){
+                   awpm = 0
+               }
+               this.setState({
+                    wpm: "WPM: " + wpm,
+                    accuracy: "Accuracy: " + Math.round(percentage*100) + "%",
+                    awpm: "AWPM: " + Math.round(awpm*100)/100,
+                    val: ''
+               })
+            }
+
+            render(){                
+                return(
+                    <div>
+                            <div 
+                                style = {{alignSelf: 'center', justifyContent: "center", display: "flex"}}>
+                                <textarea 
+                                    placeholder = {'Click the button below to start'}
+                                    onChange = {this.onTextChange}
+                                    disabled = {!this.state.playing}
+                                    value = {this.state.val}
+                                    style = {
+                                        {
+                                            width: "50rem",
+                                            height: "10rem",
+                                            alignSelf: "center",
+                                            justifySelf: "center",
+                                            resize: "none",
+                                            borderRadius: "10px",
+                                            fontSize: "20px",
+                                        }}
+                                    />
+                            </div>
+                        <div
+                                style = {{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: 'center', paddingTop: "15px"}}>
+                                <button onClick = {this.startTest}
+                                        disabled = {this.state.playing}
+                                        style = {{borderRadius: "10px", width: "100px", height: "25px"}}
+                                        >Start</button>
+                                <p style = {{ padding: "5px"}}>{this.state.secs}s</p>
+                            
+                            <p> {this.state.wpm}</p>
+                            <p> {this.state.accuracy}</p>
+                            <p> {this.state.awpm}</p>
+                            <p style = {{ fontSize: "20px", width: "75rem", textAlign: 'center' }}>{lorem}</p>
+                        </div>
+                    </div>
+
+                )
+
+            }
+        }
+
+
+        function compareArray(arr1, arr2) {
+            //arr1 is the constant array
+            //arr2 is the array that it's similarities are being printed
+            //arr2llength() < arr1.length()
+            var same = []
+            var perc
+            for(let i=0; i<arr1.length; i++){
+                if(arr1[i] == arr2[i]){
+                    same.push(arr2[i])
+                }else if (arr2[i] == ''){
+                    break;
+                }
+            }
+            console.log(arr2)
+            return (same.length / arr2.length) 
+        }
+
+        function noSpace(arr1) {
+            var arr = arr1.slice(0)
+            for(let i = 0; i < arr.length; i++){
+                if(arr[i] == ' '){
+                    arr.splice(i, 1)
+                }
+            }
+            console.log(arr)
+            return arr
+        }
+
+        const Text = ReactDOM.render(<TypingTest text = "walnuts"/>, document.getElementById('app'))
+    </script>
+</body>
+</html>
